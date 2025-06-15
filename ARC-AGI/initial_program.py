@@ -56,8 +56,8 @@ def split_XY(sequence):
     if current_sublist:
         result.append(current_sublist)
         
-    x = current_sublist[0]
-    y = current_sublist[1]
+    x = result[0]
+    y = result[1]
     
     x = tok.detokenize_grid_unpadded(x)
     y = tok.detokenize_grid_unpadded(y)
@@ -86,6 +86,11 @@ def load_data(ood_path):
 
             input_grids.append(inp_grid)
             target_grids.append(out_grid)
+
+    # Convert tuples to lists for both input and target grids
+    for idx, example in enumerate(input_grids):
+        input_grids[idx] = np.array([list(grid) for grid in example])
+        target_grids[idx] = np.array([list(grid) for grid in target_grids[idx]])
 
     return input_grids, target_grids
 
