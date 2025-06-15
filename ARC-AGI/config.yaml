@@ -2,13 +2,108 @@
 max_iterations: 1000
 
 llm:
-  primary_model: "gpt-4.1-mini"
+  # Models for evolution
+  models:
+    # List of available models with their weights
+    - name: "gpt-4.1-mini"
+      weight: 1.0
+
+  # Models for LLM feedback
+  evaluator_models:
+    # List of available models with their weights
+    - name: "gpt-4.1-mini"
+      weight: 1.0
+
   temperature: 0.7
+  top_p: 0.95                         # Top-p sampling parameter
+  max_tokens: 4096                    # Maximum tokens to generate
 
   # API configuration
   api_base: "https://api.openai.com/v1"         # Base URL for API
   api_key: "<YOUR SECRET KEY HERE>"                       # API key (defaults to OPENAI_API_KEY env variable)
 
+  # Request parameters
+  timeout: 60                         # Timeout for API requests in seconds
+  retries: 3                          # Number of retries for failed requests
+  retry_delay: 5                      # Delay between retries in seconds
+
+  primary_model: "gpt-4.1-mini"
+  primary_model_weight: 1.0
+  secondary_model: "gpt-4.1-mini"
+  secondary_model_weight: 0.0
+
 database:
   population_size: 500
   num_islands: 5
+
+# Prompt configuration
+prompt:
+  template_dir: null                  # Custom directory for prompt templates
+  system_message: "You are an expert coder helping to improve programs through evolution that will solve ARC-AGI tasks (grid-based problems)."
+  evaluator_system_message: "You are an expert code reviewer for programs intended to solve ARC-AGI tasks (grid-based problems)."
+
+  # Number of examples to include in the prompt
+  num_top_programs: 3                 # Number of top-performing programs to include
+  num_diverse_programs: 2             # Number of diverse programs to include
+
+  # Template stochasticity
+  use_template_stochasticity: true    # Use random variations in templates for diversity
+  template_variations:                # Different phrasings for parts of the template
+    improvement_suggestion:
+      - "Here's how we could improve this code:"
+      - "I suggest the following improvements:"
+      - "We can enhance this code by:"
+
+  # Note: meta-prompting features are not yet implemented
+
+# Database configuration
+database:
+  # General settings
+  db_path: null                       # Path to persist database (null = in-memory only)
+  in_memory: true                     # Keep database in memory for faster access
+
+  # Evolutionary parameters
+  population_size: 1000               # Maximum number of programs to keep in memory
+  archive_size: 100                   # Size of elite archive
+  num_islands: 5                      # Number of islands for island model (separate populations)
+
+  # Island-based evolution parameters
+  # Islands provide diversity by maintaining separate populations that evolve independently.
+  # Migration periodically shares the best solutions between adjacent islands.
+  migration_interval: 50              # Migrate between islands every N generations
+  migration_rate: 0.1                 # Fraction of top programs to migrate (0.1 = 10%)
+
+  # Selection parameters
+  elite_selection_ratio: 0.1          # Ratio of elite programs to select
+  exploration_ratio: 0.2              # Ratio of exploration vs exploitation
+  exploitation_ratio: 0.7             # Ratio of exploitation vs random selection
+  # Note: diversity_metric is fixed to "edit_distance" (feature_based not implemented)
+
+  # Feature map dimensions for MAP-Elites
+  feature_dimensions:                 # Dimensions for MAP-Elites feature map
+    - "score"                         # Performance score
+    - "complexity"                    # Code complexity (length)
+  feature_bins: 10                    # Number of bins per dimension
+
+# Evaluator configuration
+evaluator:
+  # General settings
+  timeout: 300                        # Maximum evaluation time in seconds
+  max_retries: 3                      # Maximum number of retries for evaluation
+
+  # Note: resource limits (memory_limit_mb, cpu_limit) are not yet implemented
+
+  # Evaluation strategies
+  cascade_evaluation: true            # Use cascade evaluation to filter bad solutions early
+  cascade_thresholds:                 # Thresholds for advancing to next evaluation stage
+    - 0.5                             # First stage threshold
+    - 0.75                            # Second stage threshold
+    - 0.9                             # Third stage threshold
+
+  # Parallel evaluation
+  parallel_evaluations: 4             # Number of parallel evaluations
+  # Note: distributed evaluation is not yet implemented
+
+  # LLM-based feedback (experimental)
+  use_llm_feedback: false             # Use LLM to evaluate code quality
+  llm_feedback_weight: 0.1            # Weight for LLM feedback in final score
