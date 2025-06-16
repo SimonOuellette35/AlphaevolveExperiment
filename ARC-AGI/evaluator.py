@@ -43,22 +43,14 @@ def evaluate(program_path: str) -> float:
         program = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(program)
 
-        # Check if the required function exists
-        if not hasattr(program, "run_search"):
-            print(f"Error: program does not have 'run_search' function")
-            return {
-                "value_score": 0.0,
-                "distance_score": 0.0,
-                "speed_score": 0.0,
-                "combined_score": 0.0,
-                "error": "Missing run_search function",
-            }
-
         # Run with timeout
-        success_rate = run_with_timeout(program.run_search, timeout_seconds=5)
+        success_rate, input_grids, output_grids, actual_result = run_with_timeout(program.run_search, timeout_seconds=5)
 
         return {
-            "similarity_score": success_rate
+            "similarity_score": success_rate,
+            "input_grids": input_grids,
+            "target_grids": output_grids,
+            "current_result": actual_result
         }
     except Exception as e:
         print(f"Evaluation failed completely: {str(e)}")

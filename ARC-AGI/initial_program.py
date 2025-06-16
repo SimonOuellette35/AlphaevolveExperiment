@@ -97,7 +97,7 @@ def load_data(ood_path):
 # This part remains fixed (not evolved)
 # It ensures that OpenEvolve can consistently call the evolving function.
 def run_search():
-    OOD_path = 'ARC-AGI/ood_data1.json'
+    OOD_path = 'ARC-AGI/ood_data4.json'
 
     # load the input grids from the json file
     input_grids, target_grids = load_data(OOD_path)
@@ -107,6 +107,6 @@ def run_search():
     # calculate pixelwise similarity between output_grids and input_grids
     similarity_value = get_similarity(pred_grids, target_grids)
 
-    return similarity_value
+    return similarity_value, input_grids[:3], target_grids[:3], pred_grids[:3]
 
 # Note: The actual structure of initial_program.py is determined by data_api.py.
